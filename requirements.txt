@@ -3,3 +3,4 @@ transformers
 peft
 torch
 bitsandbytes-cuda117
+bitsandbytes
