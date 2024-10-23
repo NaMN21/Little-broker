@@ -83,4 +83,4 @@ st.write(
     "This application uses a Hugging Face model to generate text responses based on user prompts. "
     "It is powered by Streamlit and deployed on Azure."
 )
-st.write("Developed by [Your Name](https://github.com/NaMN21) | 🌐 [GitHub](https://github.com/NaMN21/Little-broker)")
+st.write  🌐 [GitHub](https://github.com/NaMN21/Little-broker)")
