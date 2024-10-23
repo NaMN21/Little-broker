@@ -1,0 +1,73 @@
+name: Build and deploy Python app to Azure Web App - Littlebroker
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python version
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+
+      # Create and activate virtual environment
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
+      # Install dependencies
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Zip the artifact for deployment
+      - name: Zip artifact for deployment
+        run: |
+          zip -r release.zip . -x "*.git*" -x "*venv*" -x "*.github*" -x "*.pytest_cache*" -x "*.mypy_cache*"
+
+      # Upload the artifact
+      - name: Upload artifact for deployment jobs
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-app
+          path: release.zip
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build  # Ensure this job runs after the build job
+    steps:
+      # Download artifact
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: python-app  # Must match the artifact name in the build job
+
+      # Unzip the artifact
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
+
+      - name: Login to Azure
+        run: |
+          az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      # Deploy to Azure
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v2
+        id: deploy-to-webapp
+        with:
+          app-name: 'Littlebroker'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+
+      # Show Azure App Service logs
+      - name: Show Azure App Service logs
+        run: |
+          az webapp log tail --name 'Littlebroker' --resource-group 'Littlebroker_group'
