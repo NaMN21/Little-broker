@@ -2,4 +2,4 @@ streamlit
 transformers
 peft
 torch
-bitsandbytes-cuda124
+bitsandbytes-cuda117
