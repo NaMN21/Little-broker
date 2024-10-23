@@ -8,7 +8,7 @@ def load_model():
     """Load the Hugging Face model."""
     st.info("Loading model...")
     config = PeftConfig.from_pretrained("tarek009/my_little_broker")
-    base_model =AutoModelForCausalLM.from_pretrained("unsloth/meta-llama", device_map="cpu", load_in_8bit=False)
+    base_model =AutoModelForCausalLM.from_pretrained("unsloth/meta-llama-3.1-8b-bnb-4bit", device_map="cpu", load_in_8bit=False)
     model = PeftModel.from_pretrained(base_model, "tarek009/my_little_broker")
     tokenizer = AutoTokenizer.from_pretrained("tarek009/my_little_broker")
     return model, tokenizer
